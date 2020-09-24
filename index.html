@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+* {box-sizing: border-box;}
+
+/* Button used to open the chat form - fixed at the bottom of the page */
+.open-button {
+  /* background-color: #555; */
+  color: white;
+  padding: 16px 20px;
+  border: none;
+  cursor: pointer;
+  opacity: 0.8;
+  position: fixed;
+  bottom: 23px;
+  right: 28px;
+  width: 100px;
+}
+
+/* Button used to open the chat form - fixed at the bottom of the page */
+.close-button {
+  color: white;
+  padding: 16px 20px;
+  border: none;
+  cursor: pointer;
+  opacity: 0.8;
+  position: fixed;
+  bottom: 23px;
+  right: 28px;
+  width: 100px;
+}
+
+/* The popup chat - hidden by default */
+.chat-popup {
+  padding: 16px 20px;
+  position: fixed;
+  bottom: 90px;
+  right: 220px;
+  width: 280px;
+  color: cornflowerblue;
+}
+
+/* Add styles to the form container */
+.form-container {
+  max-width: 300px;
+  padding: 10px;
+  background-color: white;
+}
+
+/* Full-width textarea */
+.form-container textarea {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 22px 0;
+  border: none;
+  background: #f1f1f1;
+  resize: none;
+  min-height: 200px;
+}
+
+/* When the textarea gets focus, do something */
+.form-container textarea:focus {
+  background-color: #ddd;
+  outline: none;
+}
+
+/* Set a style for the submit/send button */
+.form-container .btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 16px 20px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom:10px;
+  opacity: 0.8;
+}
+
+/* Add a red background color to the cancel button */
+.form-container .cancel {
+  background-color: red;
+}
+
+/* Add some hover effects to buttons */
+.form-container .btn:hover, .open-button:hover {
+  opacity: 1;
+}
+
+/* Used for chat window */
+.circle {
+	width: 450px;
+	height: 600px;
+	-moz-border-radius: 50%;
+	-webkit-border-radius: 50%;
+	border-radius: 5%;
+	overflow:hidden;
+	position:relative;
+}
+.bottomright {
+  position: fixed;
+  right: 250px; bottom: 650px;
+  width: 400px;
+  height:600px;
+}
+
+/* testing start*/
+
+
+
+/* testing end */
+</style>
+</head>
+<body>
+
+  <script type = "text/javascript" src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"> </script>
+<script src="./jquery.min.js"></script>
+<script src="./list.min.js"></script>
+<script>
+// this code block is for speech to text recognition
+function onoff(){
+  currentvalue = document.getElementById('onoff').value;
+  if(currentvalue == "Off"){
+    document.getElementById("onoff").value="On";
+      recognition.start();//recognition.stop();
+  }else{
+    document.getElementById("onoff").value="Off";
+    recognition.stop()//recognition.start();
+  }
+}
+
+if (!('webkitSpeechRecognition' in window)) {
+    //Speech API not supported here…
+} else { //Let’s do some cool stuff :)
+    var recognition = new webkitSpeechRecognition(); //That is the object that will manage our whole recognition process. 
+    recognition.continuous = true;   //Suitable for dictation. 
+    recognition.interimResults = true;  //If we want to start receiving results even if they are not final.
+    //Define some more additional parameters for the recognition:
+    recognition.lang = "en-US"; 
+    //recognition.maxAlternatives = 1; //Since from our experience, the highest result is really the best...
+}
+
+recognition.onstart = function() {
+    //Listening (capturing voice from audio input) started.
+    //This is a good place to give the user visual feedback about that (i.e. flash a red light, etc.)
+    document.getElementById("onoff").src = 'https://speechlogger.appspot.com/images/micoff2.png';
+};
+
+recognition.onend = function() {
+    //Again – give the user feedback that you are not listening anymore. If you wish to achieve continuous recognition – you can write a script to start the recognizer again here.
+    document.getElementById("onoff").src = 'https://speechlogger.appspot.com/images/micslash2.png';
+};
+
+recognition.onresult = function(event) { //the event holds the results
+//Yay – we have results! Let’s check if they are defined and if final or not:
+    if (typeof(event.results) === 'undefined') { //Something is wrong…
+        recognition.stop();
+        return;
+    }
+	var iframe = document.getElementById("myframe");
+	var elmnt = iframe.contentWindow.document.getElementsByTagName("textarea")[0];
+    for (var i = event.resultIndex; i < event.results.length; ++i) {      
+        if (event.results[i].isFinal) { //Final results
+            console.log("final results: " + event.results[i][0].transcript);   //Of course – here is the place to do useful things with the results.
+            elmnt.value = event.results[i][0].transcript;
+        } else {   //i.e. interim...
+            console.log("interim results: " + event.results[i][0].transcript);  //You can use these results to give the user near real time experience.
+            elmnt.value = event.results[i][0].transcript;
+        } 
+    } //end for loop
+}; 
+
+
+function startButton(event) {
+    recognition.start();
+    //start_img.src = 'https://speechlogger.appspot.com/images/micslash2.png'; //We change the image to a slashed until the user approves the browser to listen and recognition actually starts. Then – we’ll change the image to ‘mic on’.
+}
+
+ </script>
+
+<!-- <button class="open-button" id="open_chat_btn" onclick="openForm()">Chat</button> -->
+<img src="images/chat_icon.png" class="open-button" id="open_chat_btn" onclick="openForm()" style="visibility: hidden;"/>
+
+<div class="chat-popup" id="myForm">
+  <!-- <div class="bottomright"> -->
+        <div class="circle">
+        <!-- <input type="button" value="On" id="onoff" onclick="onoff();"> -->
+        <img src="https://speechlogger.appspot.com/images/micoff2.png" value="On" id="onoff" onclick="onoff();">
+            <iframe src="indextts.php" id="myframe" width="450px" height="550px" frameborder="0" allowfullscreen></iframe>
+        </div>
+        <!-- <button type="button" class="close-button" id="close_chat_btn" onclick="closeForm()">Close</button> -->
+        
+    <!-- </div> -->
+</div>  
+<img src="images/close_btn.png" class="close-button" id="close_chat_btn" onclick="closeForm()"/>    
+
+<script>
+
+$( "#open_chat_btn" ).click(function() {
+  $( "#myForm" ).show( "slow" );
+});
+
+$( "#close_chat_btn" ).click(function() {
+  $( "#myForm" ).hide( "slow" );
+});
+
+function openForm() {
+  // document.getElementById("myForm").style.display = "block";
+  document.getElementById("close_chat_btn").style.visibility = 'visible';
+  document.getElementById("open_chat_btn").style.visibility = 'hidden';
+}
+
+function closeForm() {
+  // document.getElementById("myForm").style.display = "none";
+  document.getElementById("close_chat_btn").style.visibility = 'hidden';
+  document.getElementById("open_chat_btn").style.visibility = 'visible';
+}
+</script>
+</body>
+</html>
